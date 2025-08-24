@@ -6,6 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
+type Error struct {
+	Error string `json:"error"`
+}
 type User struct {
 	ID       uuid.UUID `json:"id"`
 	Login    string    `json:"login"`
@@ -18,7 +21,7 @@ type User struct {
 	Status   bool      `json:"status"`
 }
 
-var users = []User{
+var Users = []User{
 	{
 		ID:       uuid.New(),
 		Login:    "Kolya",
