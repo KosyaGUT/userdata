@@ -3,31 +3,39 @@ package readU
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/kosyagut/userdata/internal/handler"
-
-	"github.com/gin-gonic/gin"
+	"github.com/kosyagut/userdata/internal/storage"
 )
 
-func GetUsers(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, handler.Users)
-}
-
-func GetIDUser(c *gin.Context) {
-	id := c.Param("id")
-
-	strID, err := uuid.Parse(id)
-	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid id format"})
-		return
-	}
-
-	for _, user := range handler.Users {
-		if strID == user.ID {
-			c.IndentedJSON(http.StatusOK, user)
+func GetUsers(userStorage *storage.UserStorage) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		users, err := userStorage.GetUsers()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, handler.Error{Error: err.Error()})
 			return
 		}
+		c.JSON(http.StatusOK, users)
 	}
+}
 
-	c.IndentedJSON(http.StatusNotFound, handler.Error{Error: "Not Found"})
+func GetIDUser(userStorage *storage.UserStorage) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		userID, err := uuid.Parse(id)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, handler.Error{Error: "invalid id format"})
+			return
+		}
+
+		user, err := userStorage.GetUserByID(userID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, handler.Error{Error: "User not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, user)
+	}
 }

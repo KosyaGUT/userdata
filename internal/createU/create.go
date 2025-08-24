@@ -7,18 +7,26 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/kosyagut/userdata/internal/handler"
+	"github.com/kosyagut/userdata/internal/storage"
 )
 
-func PostUser(c *gin.Context) {
-	var newUser handler.User
+func PostUser(userStorage *storage.UserStorage) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var newUser storage.User
 
-	if err := c.BindJSON(&newUser); err != nil {
-		c.JSON(http.StatusBadRequest, handler.Error{Error: "Bad Request"})
+		if err := c.BindJSON(&newUser); err != nil {
+			c.JSON(http.StatusBadRequest, handler.Error{Error: "Bad Request"})
+			return
+		}
+
+		newUser.ID = uuid.New()
+		newUser.DateReg = time.Now()
+
+		if err := userStorage.CreateUser(newUser); err != nil {
+			c.JSON(http.StatusInternalServerError, handler.Error{Error: err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusCreated, newUser)
 	}
-
-	newUser.ID = uuid.New()
-	newUser.DateReg = time.Now()
-
-	handler.Users = append(handler.Users, newUser)
-	c.IndentedJSON(http.StatusCreated, newUser)
 }
