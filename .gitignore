@@ -9,3 +9,5 @@ vendor/
 # IDE
 .idea/
 .vscode/
+
+.env
