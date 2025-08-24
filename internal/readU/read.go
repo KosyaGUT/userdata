@@ -1,7 +1,7 @@
 package readU
 
 import (
-	"github.com/kosyagut/userdata/internal/handler"
+	"github.com/kosyagut/userdata/internal/userdata/handler"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
